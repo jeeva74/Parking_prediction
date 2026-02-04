@@ -140,118 +140,224 @@ def draw_parking_dashboard(
     recommendation: str,
 ):
     """
-    Step 4, 7, 8, 9: Overlay real-time & predicted parking status, plus recommendation.
+    Step 4, 7, 8, 9: Professional dashboard with clean typography.
+    All text is properly contained within boxes with proper spacing.
     """
-    # Semi-transparent dashboard panel
-    overlay = frame.copy()
     h, w, _ = frame.shape
-    panel_height = 180
-    cv2.rectangle(
-        overlay,
-        (0, 0),
-        (w, panel_height),
-        (0, 0, 0),
-        thickness=-1,
-    )
-    alpha = 0.5
-    cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
-
-    # Text positions
-    x_left = 10
-    y_base = 30
-    line_gap = 30
-
-    # Real-time counts
+    
+    # Panel dimensions - adjusted to fit all content
+    left_panel_w = 360
+    left_panel_h = 220
+    left_x0 = 15
+    left_y0 = 15
+    left_x1 = left_x0 + left_panel_w
+    left_y1 = left_y0 + left_panel_h
+    
+    right_panel_w = 380
+    right_panel_h = 160
+    right_x0 = w - right_panel_w - 15
+    right_y0 = 15
+    right_x1 = w - 15
+    right_y1 = right_y0 + right_panel_h
+    
+    # Draw semi-transparent dark panels
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (left_x0, left_y0), (left_x1, left_y1), (15, 15, 15), thickness=-1)
+    cv2.rectangle(overlay, (right_x0, right_y0), (right_x1, right_y1), (15, 15, 15), thickness=-1)
+    cv2.addWeighted(overlay, 0.80, frame, 0.20, 0, frame)
+    
+    # Clean borders
+    cv2.rectangle(frame, (left_x0, left_y0), (left_x1, left_y1), (80, 80, 80), 2)
+    cv2.rectangle(frame, (right_x0, right_y0), (right_x1, right_y1), (80, 80, 80), 2)
+    
+    # Professional font settings
+    font = cv2.FONT_HERSHEY_DUPLEX
+    font_scale_title = 0.75
+    font_scale_label = 0.60
+    font_scale_value = 0.65
+    font_scale_small = 0.50
+    font_thick_title = 2
+    font_thick_normal = 1
+    font_thick_value = 2
+    
+    padding = 18
+    line_height = 28
+    start_y_offset = 30
+    
+    # ========== LEFT PANEL - Parking Status ==========
+    y = left_y0 + start_y_offset
+    
+    # Title
     cv2.putText(
-        frame,
-        f"Two Wheelers (inside): {two_w_count}",
-        (x_left, y_base),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (255, 0, 0),
-        2,
+        frame, "PARKING STATUS",
+        (left_x0 + padding, y),
+        font, font_scale_title, (255, 255, 255), font_thick_title
     )
+    y += line_height + 8
+    
+    # Two Wheelers
     cv2.putText(
-        frame,
-        f"Four Wheelers (inside): {four_w_count}",
-        (x_left, y_base + line_gap),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (0, 255, 0),
-        2,
+        frame, "Two Wheelers:",
+        (left_x0 + padding, y),
+        font, font_scale_label, (220, 220, 220), font_thick_normal
     )
-
-    # Parking capacity and status
+    text_size = cv2.getTextSize(f"{two_w_count}", font, font_scale_value, font_thick_value)[0]
     cv2.putText(
-        frame,
-        f"Total Slots: {TOTAL_PARKING_SLOTS}",
-        (x_left, y_base + 2 * line_gap),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (255, 255, 255),
-        2,
+        frame, f"{two_w_count}",
+        (left_x1 - padding - text_size[0], y),
+        font, font_scale_value, (100, 150, 255), font_thick_value
     )
+    y += line_height
+    
+    # Four Wheelers
     cv2.putText(
-        frame,
-        f"Occupied: {occupied}  |  Available: {available}",
-        (x_left, y_base + 3 * line_gap),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        (255, 255, 255),
-        2,
+        frame, "Four Wheelers:",
+        (left_x0 + padding, y),
+        font, font_scale_label, (220, 220, 220), font_thick_normal
     )
-
-    # Status with color indicator
-    status_text = f"Status: {status}"
+    text_size = cv2.getTextSize(f"{four_w_count}", font, font_scale_value, font_thick_value)[0]
     cv2.putText(
-        frame,
-        status_text,
-        (x_left, y_base + 4 * line_gap),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        status_color,
-        2,
+        frame, f"{four_w_count}",
+        (left_x1 - padding - text_size[0], y),
+        font, font_scale_value, (100, 255, 100), font_thick_value
     )
-
-    # Color circle indicator
-    cv2.circle(frame, (w - 40, 40), 15, status_color, thickness=-1)
-
-    # Prediction & recommendation on the right side
+    y += line_height + 5
+    
+    # Divider line
+    cv2.line(frame, (left_x0 + padding, y), (left_x1 - padding, y), (60, 60, 60), 1)
+    y += line_height
+    
+    # Total Slots
+    cv2.putText(
+        frame, "Total Slots:",
+        (left_x0 + padding, y),
+        font, font_scale_label, (220, 220, 220), font_thick_normal
+    )
+    text_size = cv2.getTextSize(f"{TOTAL_PARKING_SLOTS}", font, font_scale_value, font_thick_value)[0]
+    cv2.putText(
+        frame, f"{TOTAL_PARKING_SLOTS}",
+        (left_x1 - padding - text_size[0], y),
+        font, font_scale_value, (255, 255, 255), font_thick_value
+    )
+    y += line_height
+    
+    # Occupied
+    cv2.putText(
+        frame, "Occupied:",
+        (left_x0 + padding, y),
+        font, font_scale_label, (220, 220, 220), font_thick_normal
+    )
+    text_size = cv2.getTextSize(f"{occupied}", font, font_scale_value, font_thick_value)[0]
+    cv2.putText(
+        frame, f"{occupied}",
+        (left_x1 - padding - text_size[0], y),
+        font, font_scale_value, (50, 50, 255), font_thick_value
+    )
+    y += line_height
+    
+    # Available
+    cv2.putText(
+        frame, "Available:",
+        (left_x0 + padding, y),
+        font, font_scale_label, (220, 220, 220), font_thick_normal
+    )
+    text_size = cv2.getTextSize(f"{available}", font, font_scale_value, font_thick_value)[0]
+    cv2.putText(
+        frame, f"{available}",
+        (left_x1 - padding - text_size[0], y),
+        font, font_scale_value, (50, 255, 50), font_thick_value
+    )
+    y += line_height + 5
+    
+    # Status
+    cv2.putText(
+        frame, "Status:",
+        (left_x0 + padding, y),
+        font, font_scale_label, (220, 220, 220), font_thick_normal
+    )
+    status_text_size = cv2.getTextSize(status, font, font_scale_value, font_thick_value)[0]
+    status_x = left_x0 + padding + 80
+    cv2.putText(
+        frame, status,
+        (status_x, y),
+        font, font_scale_value, status_color, font_thick_value
+    )
+    # Status indicator circle
+    circle_x = status_x + status_text_size[0] + 15
+    cv2.circle(frame, (circle_x, y - 8), 8, status_color, thickness=-1)
+    cv2.circle(frame, (circle_x, y - 8), 8, (255, 255, 255), 1)
+    
+    # ========== RIGHT PANEL - Prediction ==========
     pred_time = prediction.get("time", "--:--")
     pred_level = prediction.get("level", "")
-
-    right_x = int(w * 0.45)
+    pred_indicator = prediction.get("indicator", "")
+    
+    y = right_y0 + start_y_offset
+    
+    # Title
     cv2.putText(
-        frame,
-        f"Predicted ({pred_time}): {pred_level}",
-        (right_x, y_base + 2 * line_gap),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.6,
-        (200, 200, 0),
-        2,
+        frame, "PREDICTION",
+        (right_x0 + padding, y),
+        font, font_scale_title, (255, 255, 255), font_thick_title
     )
-
-    # Wrap recommendation into two lines if needed (very simple split)
-    rec_lines = []
-    words = recommendation.split()
-    line = []
-    for word in words:
-        line.append(word)
-        if len(" ".join(line)) > 35:
-            rec_lines.append(" ".join(line))
-            line = []
-    if line:
-        rec_lines.append(" ".join(line))
-
-    for i, rec_line in enumerate(rec_lines[:3]):
+    y += line_height + 8
+    
+    # Prediction level
+    pred_text = f"{pred_level}"
+    cv2.putText(
+        frame, pred_text,
+        (right_x0 + padding, y),
+        font, font_scale_value, (0, 255, 255), font_thick_value
+    )
+    y += line_height
+    
+    # Time
+    cv2.putText(
+        frame, f"Time: {pred_time}",
+        (right_x0 + padding, y),
+        font, font_scale_small, (180, 180, 180), font_thick_normal
+    )
+    y += line_height - 3
+    
+    # Recommendation (wrapped to fit)
+    rec_text = recommendation.replace("Recommendation:", "").strip()
+    # Split long recommendations into multiple lines
+    max_chars = 38
+    if len(rec_text) > max_chars:
+        words = rec_text.split()
+        line1_words = []
+        line2_words = []
+        current_line = line1_words
+        current_len = 0
+        
+        for word in words:
+            word_len = len(word) + 1
+            if current_len + word_len > max_chars and current_line == line1_words:
+                current_line = line2_words
+                current_len = 0
+            current_line.append(word)
+            current_len += word_len
+        
+        line1 = " ".join(line1_words)
+        line2 = " ".join(line2_words) if line2_words else ""
+        
         cv2.putText(
-            frame,
-            rec_line,
-            (right_x, y_base + (3 + i) * line_gap),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.55,
-            (255, 255, 255),
-            1,
+            frame, line1,
+            (right_x0 + padding, y),
+            font, font_scale_small, (255, 255, 200), font_thick_normal
+        )
+        if line2:
+            y += line_height - 5
+            cv2.putText(
+                frame, line2,
+                (right_x0 + padding, y),
+                font, font_scale_small, (255, 255, 200), font_thick_normal
+            )
+    else:
+        cv2.putText(
+            frame, rec_text,
+            (right_x0 + padding, y),
+            font, font_scale_small, (255, 255, 200), font_thick_normal
         )
 
 
@@ -276,7 +382,7 @@ def main():
 
     # Use a relative path to the input video inside the project.
     # Change the filename here if you want to use a different input video.
-    video_path = os.path.join("inputs", "video.mp4")
+    video_path = os.path.join("inputs", "two lane.webm")
     print(f"🎥 Using video source: {os.path.abspath(video_path)}")
     cap = cv2.VideoCapture(video_path)
 
