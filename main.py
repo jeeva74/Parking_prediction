@@ -140,225 +140,205 @@ def draw_parking_dashboard(
     recommendation: str,
 ):
     """
-    Step 4, 7, 8, 9: Professional dashboard with clean typography.
-    All text is properly contained within boxes with proper spacing.
+    Step 4, 7, 8, 9: Dashboard matching the exact reference UI layout.
+    Single panel with all information organized as per reference design.
     """
     h, w, _ = frame.shape
     
-    # Panel dimensions - adjusted to fit all content
-    left_panel_w = 360
-    left_panel_h = 220
-    left_x0 = 15
-    left_y0 = 15
-    left_x1 = left_x0 + left_panel_w
-    left_y1 = left_y0 + left_panel_h
+    # Single panel dimensions - INCREASED HEIGHT for better spacing
+    panel_w = 550
+    panel_h = 240
+    panel_x0 = 15
+    panel_y0 = 15
+    panel_x1 = panel_x0 + panel_w
+    panel_y1 = panel_y0 + panel_h
     
-    right_panel_w = 380
-    right_panel_h = 160
-    right_x0 = w - right_panel_w - 15
-    right_y0 = 15
-    right_x1 = w - 15
-    right_y1 = right_y0 + right_panel_h
-    
-    # Draw semi-transparent dark panels
+    # Draw semi-transparent panel background (light gray as in reference)
     overlay = frame.copy()
-    cv2.rectangle(overlay, (left_x0, left_y0), (left_x1, left_y1), (15, 15, 15), thickness=-1)
-    cv2.rectangle(overlay, (right_x0, right_y0), (right_x1, right_y1), (15, 15, 15), thickness=-1)
-    cv2.addWeighted(overlay, 0.80, frame, 0.20, 0, frame)
+    cv2.rectangle(overlay, (panel_x0, panel_y0), (panel_x1, panel_y1), (200, 200, 200), thickness=-1)
+    cv2.addWeighted(overlay, 0.85, frame, 0.15, 0, frame)
     
-    # Clean borders
-    cv2.rectangle(frame, (left_x0, left_y0), (left_x1, left_y1), (80, 80, 80), 2)
-    cv2.rectangle(frame, (right_x0, right_y0), (right_x1, right_y1), (80, 80, 80), 2)
+    # Clean border
+    cv2.rectangle(frame, (panel_x0, panel_y0), (panel_x1, panel_y1), (100, 100, 100), 2)
+
+    # Vertical partition line between left and right sections
+    divider_x = panel_x0 + panel_w // 2 + 10
+    cv2.line(
+        frame,
+        (divider_x, panel_y0 + 8),
+        (divider_x, panel_y1 - 8),
+        (120, 120, 120),
+        1,
+    )
     
-    # Professional font settings
+    # Font settings - SMALLER for compact display
     font = cv2.FONT_HERSHEY_DUPLEX
-    font_scale_title = 0.75
-    font_scale_label = 0.60
-    font_scale_value = 0.65
-    font_scale_small = 0.50
-    font_thick_title = 2
+    font_scale_title = 0.55
+    font_scale_label = 0.45
+    font_scale_value = 0.50
+    font_scale_small = 0.40
+    font_thick_title = 1
     font_thick_normal = 1
-    font_thick_value = 2
+    font_thick_value = 1
     
-    padding = 18
-    line_height = 28
-    start_y_offset = 30
+    padding_x = 15
+    padding_y = 18
+    line_height = 26  # Increased for better spacing
+    section_gap = 10  # Gap between major sections
+    y = panel_y0 + padding_y
     
-    # ========== LEFT PANEL - Parking Status ==========
-    y = left_y0 + start_y_offset
-    
-    # Title
+    # ========== TITLE ==========
     cv2.putText(
-        frame, "PARKING STATUS",
-        (left_x0 + padding, y),
-        font, font_scale_title, (255, 255, 255), font_thick_title
+        frame, "PARKING STATUS:",
+        (panel_x0 + padding_x, y),
+        font, font_scale_title, (0, 0, 0), font_thick_title
     )
-    y += line_height + 8
+    y += line_height + 8  # More space after title
     
-    # Two Wheelers
+    # LEFT SIDE - Vehicle counts and occupancy
+    left_x = panel_x0 + padding_x
+    right_x = panel_x0 + panel_w // 2 + 20  # Start right side from middle
+    
+    # ========== LEFT SIDE: TWO-WHEEL and FOUR-WHEEL ==========
+    label_x1 = left_x
+    label_x2 = label_x1 + 150
+    
     cv2.putText(
-        frame, "Two Wheelers:",
-        (left_x0 + padding, y),
-        font, font_scale_label, (220, 220, 220), font_thick_normal
+        frame, "TWO-WHEEL:",
+        (label_x1, y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
     )
-    text_size = cv2.getTextSize(f"{two_w_count}", font, font_scale_value, font_thick_value)[0]
+    cv2.putText(
+        frame, "FOUR-WHEEL:",
+        (label_x2, y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
+    )
+    y += line_height
+    
     cv2.putText(
         frame, f"{two_w_count}",
-        (left_x1 - padding - text_size[0], y),
-        font, font_scale_value, (100, 150, 255), font_thick_value
+        (label_x1, y),
+        font, font_scale_value, (0, 0, 0), font_thick_value
     )
-    y += line_height
-    
-    # Four Wheelers
-    cv2.putText(
-        frame, "Four Wheelers:",
-        (left_x0 + padding, y),
-        font, font_scale_label, (220, 220, 220), font_thick_normal
-    )
-    text_size = cv2.getTextSize(f"{four_w_count}", font, font_scale_value, font_thick_value)[0]
     cv2.putText(
         frame, f"{four_w_count}",
-        (left_x1 - padding - text_size[0], y),
-        font, font_scale_value, (100, 255, 100), font_thick_value
+        (label_x2, y),
+        font, font_scale_value, (0, 0, 0), font_thick_value
     )
-    y += line_height + 5
+    y += line_height + section_gap
     
-    # Divider line
-    cv2.line(frame, (left_x0 + padding, y), (left_x1 - padding, y), (60, 60, 60), 1)
-    y += line_height
-    
-    # Total Slots
+    # ========== LINE 3: OCCUPIED and AVAILABLE labels ==========
     cv2.putText(
-        frame, "Total Slots:",
-        (left_x0 + padding, y),
-        font, font_scale_label, (220, 220, 220), font_thick_normal
+        frame, "OCCUPIED:",
+        (label_x1, y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
     )
-    text_size = cv2.getTextSize(f"{TOTAL_PARKING_SLOTS}", font, font_scale_value, font_thick_value)[0]
     cv2.putText(
-        frame, f"{TOTAL_PARKING_SLOTS}",
-        (left_x1 - padding - text_size[0], y),
-        font, font_scale_value, (255, 255, 255), font_thick_value
+        frame, "AVAILABLE:",
+        (label_x2, y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
     )
     y += line_height
     
-    # Occupied
-    cv2.putText(
-        frame, "Occupied:",
-        (left_x0 + padding, y),
-        font, font_scale_label, (220, 220, 220), font_thick_normal
-    )
-    text_size = cv2.getTextSize(f"{occupied}", font, font_scale_value, font_thick_value)[0]
+    # ========== LINE 4: Values for occupied and available ==========
     cv2.putText(
         frame, f"{occupied}",
-        (left_x1 - padding - text_size[0], y),
-        font, font_scale_value, (50, 50, 255), font_thick_value
+        (label_x1, y),
+        font, font_scale_value, (0, 0, 0), font_thick_value
     )
-    y += line_height
-    
-    # Available
-    cv2.putText(
-        frame, "Available:",
-        (left_x0 + padding, y),
-        font, font_scale_label, (220, 220, 220), font_thick_normal
-    )
-    text_size = cv2.getTextSize(f"{available}", font, font_scale_value, font_thick_value)[0]
     cv2.putText(
         frame, f"{available}",
-        (left_x1 - padding - text_size[0], y),
-        font, font_scale_value, (50, 255, 50), font_thick_value
+        (label_x2, y),
+        font, font_scale_value, (0, 0, 0), font_thick_value
+    )
+    y += line_height + section_gap  # More space before prediction section
+    
+    # ========== LEFT SIDE BOTTOM: TOTAL ==========
+    total_y = panel_y1 - padding_y - line_height
+    cv2.putText(
+        frame, "TOTAL:",
+        (label_x1, total_y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
+    )
+    cv2.putText(
+        frame, f"{TOTAL_PARKING_SLOTS}",
+        (label_x1 + 80, total_y),
+        font, font_scale_value, (0, 0, 0), font_thick_value
+    )
+    
+    # ========== RIGHT SIDE: PREDICTION SECTION ==========
+    pred_level = prediction.get("level", "")
+    pred_time = prediction.get("time", "--:--")
+    color_circle_x = panel_x0 + panel_w - 25
+    
+    # Reset y for right side
+    y = panel_y0 + padding_y
+    
+    # PREDICT: label
+    cv2.putText(
+        frame, "PREDICT:",
+        (right_x, y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
+    )
+    y += line_height + 3
+    
+    # Prediction value (LIKELY/HIGH/LOW)
+    if "High availability" in pred_level:
+        pred_display = "HIGH"
+    elif "Likely available" in pred_level:
+        pred_display = "LIKELY"
+    elif "Low availability" in pred_level:
+        pred_display = "LOW"
+    else:
+        pred_display = pred_level[:10] if len(pred_level) > 10 else pred_level
+    
+    cv2.putText(
+        frame, pred_display,
+        (right_x, y),
+        font, font_scale_value, (0, 0, 0), font_thick_value
+    )
+    # Green circle indicator on right
+    cv2.circle(frame, (color_circle_x, y - 6), 7, status_color, thickness=-1)
+    cv2.circle(frame, (color_circle_x, y - 6), 7, (0, 0, 0), 1)
+    y += line_height + 5
+    
+    # PLAN SHORT WAIT
+    rec_text = recommendation.replace("Recommendation:", "").strip()
+    if "alternate" in rec_text.lower() or "full" in rec_text.lower():
+        rec_display = "USE ALTERNATE"
+    elif "main parking" in rec_text.lower() or "high chance" in rec_text.lower():
+        rec_display = "USE MAIN"
+    else:
+        rec_display = "PLAN SHORT WAIT"
+    
+    cv2.putText(
+        frame, rec_display,
+        (right_x, y),
+        font, font_scale_label, (0, 0, 0), font_thick_normal
     )
     y += line_height + 5
     
-    # Status
+    # TIME
     cv2.putText(
-        frame, "Status:",
-        (left_x0 + padding, y),
-        font, font_scale_label, (220, 220, 220), font_thick_normal
+        frame, f"TIME: {pred_time}",
+        (right_x, y),
+        font, font_scale_small, (0, 0, 0), font_thick_normal
     )
-    status_text_size = cv2.getTextSize(status, font, font_scale_value, font_thick_value)[0]
-    status_x = left_x0 + padding + 80
-    cv2.putText(
-        frame, status,
-        (status_x, y),
-        font, font_scale_value, status_color, font_thick_value
-    )
-    # Status indicator circle
-    circle_x = status_x + status_text_size[0] + 15
-    cv2.circle(frame, (circle_x, y - 8), 8, status_color, thickness=-1)
-    cv2.circle(frame, (circle_x, y - 8), 8, (255, 255, 255), 1)
+    y += line_height + 5
     
-    # ========== RIGHT PANEL - Prediction ==========
-    pred_time = prediction.get("time", "--:--")
-    pred_level = prediction.get("level", "")
-    pred_indicator = prediction.get("indicator", "")
-    
-    y = right_y0 + start_y_offset
-    
-    # Title
-    cv2.putText(
-        frame, "PREDICTION",
-        (right_x0 + padding, y),
-        font, font_scale_title, (255, 255, 255), font_thick_title
-    )
-    y += line_height + 8
-    
-    # Prediction level
-    pred_text = f"{pred_level}"
-    cv2.putText(
-        frame, pred_text,
-        (right_x0 + padding, y),
-        font, font_scale_value, (0, 255, 255), font_thick_value
-    )
-    y += line_height
-    
-    # Time
-    cv2.putText(
-        frame, f"Time: {pred_time}",
-        (right_x0 + padding, y),
-        font, font_scale_small, (180, 180, 180), font_thick_normal
-    )
-    y += line_height - 3
-    
-    # Recommendation (wrapped to fit)
-    rec_text = recommendation.replace("Recommendation:", "").strip()
-    # Split long recommendations into multiple lines
-    max_chars = 38
-    if len(rec_text) > max_chars:
-        words = rec_text.split()
-        line1_words = []
-        line2_words = []
-        current_line = line1_words
-        current_len = 0
-        
-        for word in words:
-            word_len = len(word) + 1
-            if current_len + word_len > max_chars and current_line == line1_words:
-                current_line = line2_words
-                current_len = 0
-            current_line.append(word)
-            current_len += word_len
-        
-        line1 = " ".join(line1_words)
-        line2 = " ".join(line2_words) if line2_words else ""
-        
-        cv2.putText(
-            frame, line1,
-            (right_x0 + padding, y),
-            font, font_scale_small, (255, 255, 200), font_thick_normal
-        )
-        if line2:
-            y += line_height - 5
-            cv2.putText(
-                frame, line2,
-                (right_x0 + padding, y),
-                font, font_scale_small, (255, 255, 200), font_thick_normal
-            )
+    # MAY BE AVAILABLE (bottom right)
+    if "High" in pred_level:
+        avail_msg = "AVAILABLE NOW"
+    elif "Likely" in pred_level:
+        avail_msg = "MAY BE AVAILABLE"
     else:
-        cv2.putText(
-            frame, rec_text,
-            (right_x0 + padding, y),
-            font, font_scale_small, (255, 255, 200), font_thick_normal
-        )
+        avail_msg = "FULL - WAIT"
+    
+    cv2.putText(
+        frame, avail_msg,
+        (right_x, y),
+        font, font_scale_small, (0, 0, 0), font_thick_normal
+    )
 
 
 def send_to_cisco_smart_city(payload: dict):
@@ -382,7 +362,7 @@ def main():
 
     # Use a relative path to the input video inside the project.
     # Change the filename here if you want to use a different input video.
-    video_path = os.path.join("inputs", "two lane.webm")
+    video_path = os.path.join("inputs", "entrance_video.mp4")
     print(f"🎥 Using video source: {os.path.abspath(video_path)}")
     cap = cv2.VideoCapture(video_path)
 
